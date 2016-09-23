@@ -3,6 +3,18 @@
 	"ignore": "",
 	"package": [
 		{
+			"checksumSHA1": "IKr+7TrQLtTRqjd/RE7XHiDGQLg=",
+			"path": "github.com/urfave/cli",
+			"revision": "d53eb991652b1d438abdd34ce4bfa3ef1539108e",
+			"revisionTime": "2016-09-17T21:38:06Z"
+		},
+		{
+			"checksumSHA1": "cg+vZ5eWqqWHlBV3zw9RKOU56TI=",
+			"path": "github.com/xenolf/lego",
+			"revision": "82ac43327b01319544c050d5d78a4edeff9565d2",
+			"revisionTime": "2016-09-12T07:50:14Z"
+		},
+		{
 			"checksumSHA1": "CHmdoMriAboKW2nHYSXo0yBizaE=",
 			"path": "github.com/xenolf/lego/acme",
 			"revision": "ca19a90028e242e878585941c2a27c8f3b3efc25",
@@ -27,5 +39,5 @@
 			"revisionTime": "2016-03-29T20:33:11Z"
 		}
 	],
-	"rootPath": "rsc.io/letsencrypt"
+	"rootPath": "github.com/wscherphof/letsencrypt"
 }

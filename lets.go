@@ -196,15 +196,27 @@ type Manager struct {
 //
 // Serve does not return unitil the HTTPS server fails to start or else stops.
 // Either way, Serve can only return a non-nil error, never nil.
-func (m *Manager) Serve() error {
-	l, err := net.Listen("tcp", ":http")
+func (m *Manager) Serve(handler http.Handler) error {
+	l, err := net.Listen("tcp", ":80")
 	if err != nil {
 		return err
 	}
 	defer l.Close()
 	go http.Serve(l, http.HandlerFunc(RedirectHTTP))
 
-	return m.ServeHTTPS()
+	return m.ServeHTTPS(handler)
+}
+
+var pool *x509.CertPool
+func init() {
+	pool = x509.NewCertPool()
+	pool.AppendCertsFromPEM(pemCerts)
+	acme.HTTPClient = http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+            TLSClientConfig: &tls.Config{RootCAs: pool},
+        },
+	}
 }
 
 // ServeHTTPS runs an HTTPS web server using TLS certificates obtained by the manager.
@@ -212,11 +224,13 @@ func (m *Manager) Serve() error {
 // by invoking http.DefaultServeMux.
 // ServeHTTPS does not return unitil the HTTPS server fails to start or else stops.
 // Either way, ServeHTTPS can only return a non-nil error, never nil.
-func (m *Manager) ServeHTTPS() error {
+func (m *Manager) ServeHTTPS(handler http.Handler) error {
 	srv := &http.Server{
-		Addr: ":https",
+		Addr: ":443",
+		Handler: handler,
 		TLSConfig: &tls.Config{
 			GetCertificate: m.GetCertificate,
+			RootCAs: pool,
 		},
 	}
 	return srv.ListenAndServeTLS("", "")
@@ -700,7 +714,7 @@ type tlsProvider struct {
 }
 
 func (p tlsProvider) Present(domain, token, keyAuth string) error {
-	cert, dom, err := acme.TLSSNI01ChallengeCertDomain(keyAuth)
+	cert, dom, err := acme.TLSSNI01ChallengeCert(keyAuth)
 	if err != nil {
 		return err
 	}
@@ -713,7 +727,7 @@ func (p tlsProvider) Present(domain, token, keyAuth string) error {
 }
 
 func (p tlsProvider) CleanUp(domain, token, keyAuth string) error {
-	_, dom, err := acme.TLSSNI01ChallengeCertDomain(keyAuth)
+	_, dom, err := acme.TLSSNI01ChallengeCert(keyAuth)
 	if err != nil {
 		return err
 	}
